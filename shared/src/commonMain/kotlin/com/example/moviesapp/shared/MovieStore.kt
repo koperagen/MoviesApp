@@ -21,7 +21,7 @@ internal class MovieStoreFactory(private val factory: StoreFactory, private val 
     fun create(): MovieStore = object : MovieStore, Store<Intent, State, Nothing> by factory.create(
         name = "MovieStore",
         initialState = State(emptyList(), 0),
-        executorFactory = { ExecutorImpl(api) },
+        executorFactory = ::ExecutorImpl,
         reducer = ReducerImpl
     ) {}
 
@@ -33,7 +33,7 @@ internal class MovieStoreFactory(private val factory: StoreFactory, private val 
         object LoadFirstPage : Action()
     }
 
-    private class ExecutorImpl(private val api: MovieApi) : SuspendExecutor<Intent, Action, State, Result, Nothing>() {
+    private inner class ExecutorImpl : SuspendExecutor<Intent, Action, State, Result, Nothing>() {
 
         override suspend fun executeAction(action: Action, getState: () -> State) {
             return when (action) {
