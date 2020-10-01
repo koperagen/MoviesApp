@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization")
     id("com.android.library")
     id("kotlin-android-extensions")
+    id("com.squareup.sqldelight")
 }
 group = "com.example.moviesapp"
 version = "1.0-SNAPSHOT"
@@ -13,6 +14,7 @@ val ktorVersion = "1.4.0"
 val serializationVersion = "1.0.0-RC"
 val coroutinesVersion = "1.3.9-native-mt"
 val mviKotlinVersion = "2.0.0-rc3"
+val sqlDelightVersion: String by project
 
 repositories {
     gradlePluginPortal()
@@ -36,11 +38,12 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
+                implementation("com.squareup.sqldelight:runtime:$sqlDelightVersion")
             }
         }
         val commonTest by getting {
@@ -53,6 +56,7 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-client-android:$ktorVersion")
                 implementation("com.google.android.material:material:1.2.0")
+                implementation("com.squareup.sqldelight:android-driver:$sqlDelightVersion")
             }
         }
         val androidTest by getting {
@@ -61,7 +65,11 @@ kotlin {
                 implementation("junit:junit:4.12")
             }
         }
-        val iosMain by getting
+        val iosMain by getting {
+            dependencies {
+                implementation("com.squareup.sqldelight:native-driver:$sqlDelightVersion")
+            }
+        }
         val iosTest by getting
     }
 }
@@ -78,6 +86,11 @@ android {
         getByName("release") {
             isMinifyEnabled = false
         }
+    }
+}
+sqldelight {
+    database("AppDatabase") {
+        packageName = "com.example.moviesapp.shared.cache"
     }
 }
 val packForXcode by tasks.creating(Sync::class) {
