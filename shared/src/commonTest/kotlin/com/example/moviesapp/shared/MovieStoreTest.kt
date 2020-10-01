@@ -23,6 +23,13 @@ class MovieStoreTest {
     }
 
     @Test
+    fun shows_first_page() {
+        createStore()
+
+        assertEquals(1, store.state.currentPage)
+    }
+
+    @Test
     fun loads_next_page_WHEN_Intent_NextPage() {
         createStore()
 
@@ -32,7 +39,12 @@ class MovieStoreTest {
     }
 
     private fun createStore() {
-        store = MovieStoreFactory(DefaultStoreFactory, TestMovieApi()).create()
+        store = MovieStoreFactory(
+            DefaultStoreFactory,
+            TestMovieApi(),
+            Dispatchers.Unconfined,
+            Dispatchers.Unconfined
+        ).create()
     }
 
 }
