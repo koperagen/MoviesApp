@@ -1,18 +1,37 @@
 import kotlin.collections.List;
 
 CREATE TABLE Movies (
-    id INTEGER NOT NULL,
+    id INTEGER AS Int NOT NULL,
     poster_path TEXT,
     adult INTEGER AS Boolean NOT NULL,
     overview TEXT NOT NULL,
     release_date TEXT NOT NULL,
-    genre_ids TEXT As List<Int> NOT NULL,
+    genre_ids TEXT AS List<Int> NOT NULL,
     original_title TEXT NOT NULL,
-    original_langauge TEXT NOT NULL,
+    original_language TEXT NOT NULL,
     title TEXT NOT NULL,
     backdrop_path TEXT,
-    populatiry REAL,
-    vote_count INTEGER,
-    video INTEGER AS Boolean,
-    vote_average REAL
+    popularity REAL NOT NULL,
+    vote_count INTEGER AS Int NOT NULL,
+    video INTEGER AS Boolean NOT NULL,
+    vote_average REAL NOT NULL
 );
+
+saveMovie:
+INSERT INTO Movies VALUES ?;
+
+selectMoviesByIds:
+SELECT * FROM Movies WHERE id IN ?;
+
+CREATE TABLE MovieDiscoveries (
+    page INTEGER AS Int NOT NULL,
+    movies TEXT AS List<Int> NOT NULL,
+    total_results INTEGER AS Int NOT NULL,
+    total_pages INTEGER AS Int NOT NULL
+);
+
+saveDiscovery:
+INSERT INTO MovieDiscoveries VALUES ?;
+
+loadDiscovery:
+SELECT * FROM MovieDiscoveries WHERE page = ?;
