@@ -23,7 +23,7 @@ internal class MoviesCache(private val database: AppDatabase) {
         }.executeAsOneOrNull()
     }
 
-    fun cache(movies: MovieDiscovery) {
+    fun persist(movies: MovieDiscovery) {
         movies.results.forEach {
             cacheMovie(it)
         }
