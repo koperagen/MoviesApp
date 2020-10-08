@@ -41,7 +41,10 @@ class MovieStoreTest {
     private fun createStore() {
         store = MovieStoreFactory(
             DefaultStoreFactory,
-            TestMovieApi(),
+            MovieRepositoryImpl(
+                network = TestMovieApi(),
+                cache = TestMoviesCache()
+            ),
             Dispatchers.Unconfined,
             Dispatchers.Unconfined
         ).create()

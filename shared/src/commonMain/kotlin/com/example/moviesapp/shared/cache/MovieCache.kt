@@ -11,9 +11,50 @@ internal fun createDatabase(driverFactory: DriverFactory): AppDatabase =
         MoviesAdapter = Movies.Adapter(IntListToStringAdapter)
     )
 
-internal class MoviesCache(private val database: AppDatabase) {
+abstract class MoviesCache {
 
-    fun getAllMovies(page: Int): MovieDiscovery? {
+    abstract fun getAllMovies(page: Int): MovieDiscovery?
+
+    abstract fun persist(movies: MovieDiscovery)
+
+    protected fun Movies.toEntity() = Movie(
+        posterPath = poster_path,
+        adult = adult,
+        overview = overview,
+        releaseDate = release_date,
+        genreIds = genre_ids,
+        id = id,
+        originalTitle = original_title,
+        originalLanguage = original_language,
+        title = title,
+        backdropPath = backdrop_path,
+        popularity = popularity,
+        voteCount = vote_count,
+        video = video,
+        voteAverage = vote_average
+    )
+
+    protected fun Movie.toDto() = Movies(
+        poster_path = posterPath,
+        adult = adult,
+        overview = overview,
+        release_date = releaseDate,
+        genre_ids = genreIds,
+        id = id,
+        original_title = originalTitle,
+        original_language = originalLanguage,
+        title = title,
+        backdrop_path = backdropPath,
+        popularity = popularity,
+        vote_count = voteCount,
+        video = video,
+        vote_average = voteAverage
+    )
+}
+
+internal class DatabaseMoviesCache(private val database: AppDatabase) : MoviesCache() {
+
+    override fun getAllMovies(page: Int): MovieDiscovery? {
         return database.appDatabaseQueries.loadDiscovery(page) { page, moviesIds, total_results, total_pages ->
             val movies = database.appDatabaseQueries
                 .selectMoviesByIds(moviesIds)
@@ -23,7 +64,7 @@ internal class MoviesCache(private val database: AppDatabase) {
         }.executeAsOneOrNull()
     }
 
-    fun persist(movies: MovieDiscovery) {
+    override fun persist(movies: MovieDiscovery) {
         movies.results.forEach {
             cacheMovie(it)
         }
@@ -41,39 +82,6 @@ internal class MoviesCache(private val database: AppDatabase) {
         database.appDatabaseQueries.saveMovie(movie.toDto())
     }
 
-    private fun Movies.toEntity() = Movie(
-        posterPath = poster_path,
-        adult = adult,
-        overview = overview,
-        releaseDate = release_date,
-        genreIds = genre_ids,
-        id = id,
-        originalTitle = original_title,
-        originalLanguage = original_language,
-        title = title,
-        backdropPath = backdrop_path,
-        popularity = popularity,
-        voteCount = vote_count,
-        video = video,
-        voteAverage = vote_average
-    )
-
-    private fun Movie.toDto() = Movies(
-        poster_path = posterPath,
-        adult = adult,
-        overview = overview,
-        release_date = releaseDate,
-        genre_ids = genreIds,
-        id = id,
-        original_title = originalTitle,
-        original_language = originalLanguage,
-        title = title,
-        backdrop_path = backdropPath,
-        popularity = popularity,
-        vote_count = voteCount,
-        video = video,
-        vote_average = voteAverage
-    )
 }
 
 private object IntListToStringAdapter : ColumnAdapter<List<Int>, String> {

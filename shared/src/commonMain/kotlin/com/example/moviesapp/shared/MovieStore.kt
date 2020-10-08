@@ -8,7 +8,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.SuspendExecutor
 import com.example.moviesapp.shared.MovieStore.Intent
 import com.example.moviesapp.shared.MovieStore.State
 import com.example.moviesapp.shared.network.Movie
-import com.example.moviesapp.shared.network.MovieApi
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -22,7 +21,7 @@ internal interface MovieStore : Store<Intent, State, Nothing> {
 
 internal class MovieStoreFactory(
     private val factory: StoreFactory,
-    private val api: MovieApi,
+    private val repository: MoviesRepository,
     private val mainContext: CoroutineContext,
     private val ioContext: CoroutineContext
 ) {
@@ -59,7 +58,7 @@ internal class MovieStoreFactory(
 
         private suspend fun loadPage(page: Int) {
             withContext(ioContext) {
-                val movies = api.getAllMovies(page)
+                val movies = repository.getMovies(page)
                 dispatch(Result.PageLoaded(page = page, movies = movies.results, totalPages = movies.totalPages))
             }
         }
