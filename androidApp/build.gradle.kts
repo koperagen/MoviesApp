@@ -23,6 +23,7 @@ dependencies {
     implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
     implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
     implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
+    implementation("com.arkivanov.mvikotlin:mvikotlin-logging:$mviKotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     implementation("androidx.appcompat:appcompat:1.2.0")

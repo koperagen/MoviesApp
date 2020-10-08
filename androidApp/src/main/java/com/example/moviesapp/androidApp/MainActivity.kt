@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.arkivanov.mvikotlin.core.lifecycle.asMviLifecycle
 import com.arkivanov.mvikotlin.core.view.BaseMviView
+import com.arkivanov.mvikotlin.logging.store.LoggingStoreFactory
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.example.moviesapp.shared.Greeting
 import com.example.moviesapp.shared.MovieController
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     private val controller = MovieController(
         dbFactory = { createDatabase(DriverFactory(this)) },
-        defaultStoreFactory = DefaultStoreFactory,
+        defaultStoreFactory = LoggingStoreFactory(DefaultStoreFactory),
         apiKey = "5e2154d0d7039ef73d73e64af47e8e6e",
         mainContext = Dispatchers.Main,
         ioContext = Dispatchers.IO,
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val view = findViewById<View>(R.id.main_view)
         val movieView = MovieViewImpl(view)
-        controller.onViewCreated(movieView)
+        controller.onViewCreated(movieView, lifecycle.asMviLifecycle())
     }
 
 }
@@ -86,7 +87,8 @@ private class MovieViewHolder private constructor(private val view: View) : Recy
         title.text = item.title
         voteAverage.text = view.context.getString(R.string.vote_average, item.voteAverage)
         Picasso.get()
-            .load(item.posterPath)
+            .load("http://image.tmdb.org/t/p/w500" + item.posterPath)
+            .error(R.drawable.ic_baseline_build_24)
             .into(poster)
     }
 

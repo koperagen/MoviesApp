@@ -9,9 +9,12 @@
     tools:context=".MainActivity">
 
   <androidx.recyclerview.widget.RecyclerView
+      tools:listitem="@layout/movie_item"
+      tools:itemCount="5"
       android:id="@+id/movies"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
+      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
