@@ -12,7 +12,7 @@ public interface MovieApi {
 }
 
 @Suppress("FunctionName")
-public fun MovieApi(apiKey: String): MovieApi = TODO()
+public fun MovieApi(apiKey: String): MovieApi = MovieApiImpl(apiKey)
 
 internal class MovieApiImpl(private val apiKey: String) : MovieApi {
     private val client = HttpClient {

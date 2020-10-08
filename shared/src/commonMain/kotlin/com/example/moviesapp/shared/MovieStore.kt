@@ -16,8 +16,9 @@ internal interface MovieStore : Store<Intent, State, Nothing> {
         object NextPage : Intent()
     }
 
-    data class State(val movies: List<Movie>, val currentPage: Int)
+    data class State(val movies: List<Movie>, val currentPage: Int, val totalPages: Int)
 }
+
 
 internal class MovieStoreFactory(
     private val factory: StoreFactory,
@@ -28,7 +29,7 @@ internal class MovieStoreFactory(
 
     fun create(): MovieStore = object : MovieStore, Store<Intent, State, Nothing> by factory.create(
         name = "MovieStore",
-        initialState = State(emptyList(), 0),
+        initialState = State(emptyList(), 0, 0),
         bootstrapper = SimpleBootstrapper(Action.LoadFirstPage),
         executorFactory = ::ExecutorImpl,
         reducer = ReducerImpl
@@ -57,10 +58,8 @@ internal class MovieStoreFactory(
         }
 
         private suspend fun loadPage(page: Int) {
-            withContext(ioContext) {
-                val movies = repository.getMovies(page)
-                dispatch(Result.PageLoaded(page = page, movies = movies.results, totalPages = movies.totalPages))
-            }
+            val movies = withContext(ioContext) { repository.getMovies(page) }
+            dispatch(Result.PageLoaded(page = page, movies = movies.results, totalPages = movies.totalPages))
         }
 
     }
@@ -68,7 +67,7 @@ internal class MovieStoreFactory(
     private object ReducerImpl : Reducer<State, Result> {
         override fun State.reduce(result: Result): State {
             return when (result) {
-                is Result.PageLoaded -> copy(movies = result.movies, currentPage = result.page)
+                is Result.PageLoaded -> copy(movies = result.movies, currentPage = result.page, totalPages = totalPages)
             }
         }
     }

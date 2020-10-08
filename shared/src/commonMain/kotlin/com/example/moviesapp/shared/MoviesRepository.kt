@@ -4,7 +4,7 @@ import com.example.moviesapp.shared.cache.MoviesCache
 import com.example.moviesapp.shared.network.MovieApi
 import com.example.moviesapp.shared.network.MovieDiscovery
 
-internal interface MoviesRepository {
+interface MoviesRepository {
     suspend fun getMovies(page: Int): MovieDiscovery
 }
 

@@ -13,7 +13,7 @@ version = "1.0-SNAPSHOT"
 val ktorVersion = "1.4.0"
 val serializationVersion = "1.0.0-RC"
 val coroutinesVersion = "1.3.9-native-mt"
-val mviKotlinVersion = "2.0.0-rc3"
+val mviKotlinVersion = "2.0.0"
 val sqlDelightVersion: String by project
 
 repositories {
@@ -35,6 +35,7 @@ kotlin {
     }
     sourceSets {
         val commonMain by getting {
+            languageSettings.languageVersion = "1.4"
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -43,6 +44,7 @@ kotlin {
                 implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
+                implementation("com.arkivanov.mvikotlin:mvikotlin-logging:$mviKotlinVersion")
                 implementation("com.squareup.sqldelight:runtime:$sqlDelightVersion")
             }
         }

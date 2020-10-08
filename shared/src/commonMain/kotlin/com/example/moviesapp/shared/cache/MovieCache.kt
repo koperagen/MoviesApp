@@ -4,7 +4,7 @@ import com.example.moviesapp.shared.network.Movie
 import com.example.moviesapp.shared.network.MovieDiscovery
 import com.squareup.sqldelight.ColumnAdapter
 
-internal fun createDatabase(driverFactory: DriverFactory): AppDatabase =
+fun createDatabase(driverFactory: DriverFactory): AppDatabase =
     AppDatabase(
         driver = driverFactory.create(),
         MovieDiscoveriesAdapter = MovieDiscoveries.Adapter(IntListToStringAdapter),
@@ -52,7 +52,7 @@ abstract class MoviesCache {
     )
 }
 
-internal class DatabaseMoviesCache(private val database: AppDatabase) : MoviesCache() {
+class DatabaseMoviesCache(private val database: AppDatabase) : MoviesCache() {
 
     override fun getAllMovies(page: Int): MovieDiscovery? {
         return database.appDatabaseQueries.loadDiscovery(page) { page, moviesIds, total_results, total_pages ->
