@@ -11,6 +11,7 @@ import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.moviesapp.shared.cache.AppDatabase
 import com.example.moviesapp.shared.cache.DatabaseMoviesCache
 import com.example.moviesapp.shared.network.MovieApi
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
@@ -31,6 +32,13 @@ class MovieController(
         mainContext = mainContext,
         ioContext = ioContext
     ).create()
+
+    private val favouritesStore: FavouritesStore = FavouritesStoreFactory(
+        defaultStoreFactory,
+        mainContext,
+        ioContext,
+        FavouriteDatabaseImpl(dbFactory(), ioContext)
+    ).create()
     private var binder: Binder? = null
 
     init {
@@ -40,15 +48,26 @@ class MovieController(
     fun onViewCreated(view: MovieView, viewLifecycle: Lifecycle) {
         binder = bind(viewLifecycle, BinderLifecycleMode.START_STOP) {
             store.states.map(stateToModel) bindTo view
-            view.events.map(eventToIntent) bindTo store
+            view.events.map(eventToMovieIntent).filterNotNull() bindTo store
+            view.events.map(eventToFavouritesIntent).filterNotNull() bindTo favouritesStore
         }
     }
 
 }
 
-private val eventToIntent: suspend MovieView.Event.() -> MovieStore.Intent = {
+private val eventToMovieIntent: suspend MovieView.Event.() -> MovieStore.Intent? = {
     when (this) {
         MovieView.Event.NextPageClick -> MovieStore.Intent.NextPage
+        MovieView.Event.PreviousPageClick -> MovieStore.Intent.NextPage
+        is MovieView.Event.MovieClick -> null
+    }
+}
+
+private val eventToFavouritesIntent: suspend MovieView.Event.() -> FavouritesStore.Intent? = {
+    when (this) {
+        MovieView.Event.NextPageClick ->  null
+        MovieView.Event.PreviousPageClick -> null
+        is MovieView.Event.MovieClick -> FavouritesStore.Intent.ToggleMovie(movie.id)
     }
 }
 

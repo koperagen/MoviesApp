@@ -23,6 +23,6 @@ class TestFavouritesDatabase : FavouritesDatabase {
         favouritesList = favouritesList - id
     }
 
-    override val favourites: Flow<List<Int>> = _favourites
+    override fun getFavourites(): Flow<List<Int>> = _favourites
 
 }

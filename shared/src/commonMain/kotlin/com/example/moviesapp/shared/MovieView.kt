@@ -8,6 +8,8 @@ import com.example.moviesapp.shared.network.Movie
 interface MovieView : MviView<Model, Event> {
     sealed class Event {
         object NextPageClick : Event()
+        object PreviousPageClick : Event()
+        data class MovieClick(val movie: Movie) : Event()
     }
 
     data class Model(

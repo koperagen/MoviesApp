@@ -17,9 +17,8 @@ import kotlin.coroutines.CoroutineContext
 
 internal interface FavouritesStore : Store<Intent, State, Nothing> {
     sealed class Intent {
-        data class AddMovie(val movieId: Int) : Intent()
-        data class RemoveMovie(val movieId: Int) : Intent()
         data class SetList(val movies: List<Int>) : Intent()
+        data class ToggleMovie(val movie: Int) : FavouritesStore.Intent()
     }
 
     data class State(val movies: List<Int>)
@@ -51,10 +50,15 @@ internal class FavouritesStoreFactory(
     private inner class ExecutorImpl : SuspendExecutor<Intent, Action, State, Result, Nothing>(mainContext) {
 
         override suspend fun executeIntent(intent: Intent, getState: () -> State) {
+            val state = getState()
             return when (intent) {
-                is Intent.AddMovie -> addFavourite(getState(), intent.movieId)
-                is Intent.RemoveMovie -> removeFavourite(getState(), intent.movieId)
                 is Intent.SetList -> dispatch(Result.UpdatedList(intent.movies))
+                is Intent.ToggleMovie -> {
+                    when (intent.movie in state.movies) {
+                        true -> removeFavourite(state, intent.movie)
+                        false -> addFavourite(state, intent.movie)
+                    }
+                }
             }
         }
 
@@ -83,7 +87,7 @@ internal class FavouritesStoreFactory(
         private val scope = CoroutineScope(ioContext)
 
         override suspend fun bootstrap() {
-            database.favourites
+            database.getFavourites()
                 .onEach { dispatch(Action.UpdateFavourites(movies = it)) }
                 .flowOn(mainContext)
                 .launchIn(scope)

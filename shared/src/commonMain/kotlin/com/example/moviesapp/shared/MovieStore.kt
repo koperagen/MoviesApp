@@ -6,17 +6,23 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.SuspendExecutor
 import com.example.moviesapp.shared.MovieStore.Intent
+import com.example.moviesapp.shared.MovieStore.News
 import com.example.moviesapp.shared.MovieStore.State
 import com.example.moviesapp.shared.network.Movie
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-internal interface MovieStore : Store<Intent, State, Nothing> {
+internal interface MovieStore : Store<Intent, State, News> {
     sealed class Intent {
         object NextPage : Intent()
+        object PreviousPage : Intent()
     }
 
     data class State(val movies: List<Movie>, val currentPage: Int, val totalPages: Int)
+
+    sealed class News {
+        object NoMorePages : News()
+    }
 }
 
 
@@ -27,7 +33,7 @@ internal class MovieStoreFactory(
     private val ioContext: CoroutineContext
 ) {
 
-    fun create(): MovieStore = object : MovieStore, Store<Intent, State, Nothing> by factory.create(
+    fun create(): MovieStore = object : MovieStore, Store<Intent, State, News> by factory.create(
         name = "MovieStore",
         initialState = State(emptyList(), 0, 0),
         bootstrapper = SimpleBootstrapper(Action.LoadFirstPage),
@@ -43,7 +49,7 @@ internal class MovieStoreFactory(
         object LoadFirstPage : Action()
     }
 
-    private inner class ExecutorImpl : SuspendExecutor<Intent, Action, State, Result, Nothing>(mainContext) {
+    private inner class ExecutorImpl : SuspendExecutor<Intent, Action, State, Result, News>(mainContext) {
 
         override suspend fun executeAction(action: Action, getState: () -> State) {
             return when (action) {
@@ -52,8 +58,18 @@ internal class MovieStoreFactory(
         }
 
         override suspend fun executeIntent(intent: Intent, getState: () -> State) {
+            val state = getState()
             return when (intent) {
-                Intent.NextPage -> loadPage(getState().currentPage + 1)
+                Intent.NextPage -> {
+                    loadPage(state.currentPage + 1)
+                }
+                Intent.PreviousPage -> {
+                    if (state.currentPage < 1) {
+                        publish(News.NoMorePages)
+                    } else {
+                        loadPage(state.currentPage - 1)
+                    }
+                }
             }
         }
 

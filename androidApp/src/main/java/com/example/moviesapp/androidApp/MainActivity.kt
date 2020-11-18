@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -14,7 +15,6 @@ import com.arkivanov.mvikotlin.core.lifecycle.asMviLifecycle
 import com.arkivanov.mvikotlin.core.view.BaseMviView
 import com.arkivanov.mvikotlin.logging.store.LoggingStoreFactory
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import com.example.moviesapp.shared.Greeting
 import com.example.moviesapp.shared.MovieController
 import com.example.moviesapp.shared.MovieView
 import com.example.moviesapp.shared.MovieView.Event
@@ -48,11 +48,19 @@ class MainActivity : AppCompatActivity() {
 
 class MovieViewImpl(private val root: View): BaseMviView<Model, Event>(), MovieView {
 
-    private val adapter: MoviesAdapter = MoviesAdapter()
+    private val adapter: MoviesAdapter = MoviesAdapter { dispatch(Event.MovieClick(it)) }
     private val movies: RecyclerView = root.findViewById(R.id.movies)
+    private val nextPage: Button = root.findViewById(R.id.nextPage)
+    private val previousPage: Button = root.findViewById(R.id.previousPage)
 
     init {
         movies.adapter = adapter
+        nextPage.setOnClickListener {
+            dispatch(Event.NextPageClick)
+        }
+        previousPage.setOnClickListener {
+            dispatch(Event.PreviousPageClick)
+        }
     }
 
     override fun render(model: Model) {
@@ -61,10 +69,10 @@ class MovieViewImpl(private val root: View): BaseMviView<Model, Event>(), MovieV
 
 }
 
-private class MoviesAdapter : ListAdapter<Movie, MovieViewHolder>(MovieDiffCallback) {
+private class MoviesAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, MovieViewHolder>(MovieDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
-        return MovieViewHolder.from(parent)
+        return MovieViewHolder.from(parent, onClick)
     }
 
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
@@ -73,7 +81,10 @@ private class MoviesAdapter : ListAdapter<Movie, MovieViewHolder>(MovieDiffCallb
 
 }
 
-private class MovieViewHolder private constructor(private val view: View) : RecyclerView.ViewHolder(view) {
+private class MovieViewHolder private constructor(
+    private val view: View,
+    private val onClick: (Movie) -> Unit
+) : RecyclerView.ViewHolder(view) {
 
     private val title: TextView = view.findViewById(R.id.movieTitle)
     private val voteAverage: TextView = view.findViewById(R.id.voteAverage)
@@ -86,13 +97,16 @@ private class MovieViewHolder private constructor(private val view: View) : Recy
             .load("http://image.tmdb.org/t/p/w500" + item.posterPath)
             .error(R.drawable.ic_baseline_build_24)
             .into(poster)
+        view.setOnClickListener {
+            onClick(item)
+        }
     }
 
     companion object {
-        fun from(parent: ViewGroup): MovieViewHolder {
+        fun from(parent: ViewGroup, onClick: (Movie) -> Unit): MovieViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val view = inflater.inflate(R.layout.movie_item, parent, false)
-            return MovieViewHolder(view)
+            return MovieViewHolder(view, onClick)
         }
     }
 }

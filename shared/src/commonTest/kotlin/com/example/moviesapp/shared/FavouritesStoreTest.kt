@@ -24,19 +24,19 @@ class FavouritesStoreTest {
     }
 
     @Test
-    fun adds_movie_to_favourite_ON_Intent_AddMovie() {
+    fun adds_movie_to_favourite_ON_Intent_ToggleMovie_WHEN_movie_not_favourite() {
         createStore()
 
-        store.accept(FavouritesStore.Intent.AddMovie(1))
+        store.accept(FavouritesStore.Intent.ToggleMovie(1))
 
         assertEquals(listOf(1), store.state.movies)
     }
 
     @Test
-    fun saves_favourite_to_database_ON_Intent_AddMovie() {
+    fun saves_favourite_to_database_ON_Intent_ToggleMovie_WHEN_movie_not_favourite() {
         createStore()
 
-        store.accept(FavouritesStore.Intent.AddMovie(1))
+        store.accept(FavouritesStore.Intent.ToggleMovie(1))
 
         assertEquals(listOf(1), database.favouritesList)
     }
@@ -50,21 +50,21 @@ class FavouritesStoreTest {
     }
 
     @Test
-    fun removes_movie_from_favourite_ON_Intent_RemoveMovie() {
+    fun removes_movie_from_favourite_ON_Intent_ToggleMovie_WHEN_movie_is_favourite() {
         createStore()
         database.favouritesList = listOf(1, 2, 3)
 
-        store.accept(FavouritesStore.Intent.RemoveMovie(2))
+        store.accept(FavouritesStore.Intent.ToggleMovie(2))
 
         assertEquals(listOf(1, 3), store.state.movies)
     }
 
     @Test
-    fun removes_favourite_from_database_ON_Intent_RemoveMovie() {
+    fun removes_favourite_from_database_ON_Intent_ToggleMovie_WHEN_movie_is_favourite() {
         createStore()
         database.favouritesList = listOf(1, 2, 3)
 
-        store.accept(FavouritesStore.Intent.RemoveMovie(2))
+        store.accept(FavouritesStore.Intent.ToggleMovie(2))
 
         assertEquals(listOf(1, 3), database.favouritesList)
     }
