@@ -25,10 +25,6 @@ import com.example.moviesapp.shared.network.Movie
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 
-fun greet(): String {
-    return Greeting().greeting()
-}
-
 class MainActivity : AppCompatActivity() {
 
     private val controller = MovieController(
