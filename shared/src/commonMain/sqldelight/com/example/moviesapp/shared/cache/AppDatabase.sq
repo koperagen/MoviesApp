@@ -35,3 +35,16 @@ INSERT INTO MovieDiscoveries VALUES ?;
 
 loadDiscovery:
 SELECT * FROM MovieDiscoveries WHERE page = ?;
+
+CREATE TABLE FavouriteMovies (
+    id INTEGER AS Int NOT NULL
+);
+
+addFavourite:
+INSERT INTO FavouriteMovies VALUES ?;
+
+removeFavourite:
+DELETE FROM FavouriteMovies WHERE id = ?;
+
+allFavourites:
+SELECT * FROM FavouriteMovies;
