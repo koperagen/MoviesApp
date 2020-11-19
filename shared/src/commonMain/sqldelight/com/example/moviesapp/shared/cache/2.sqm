@@ -1,0 +1,10 @@
+import kotlin.collections.List;
+
+DROP TABLE MovieDiscoveries;
+
+CREATE TABLE MovieDiscoveries (
+    page INTEGER AS Int NOT NULL UNIQUE ON CONFLICT REPLACE,
+    movies TEXT AS List<Int> NOT NULL,
+    total_results INTEGER AS Int NOT NULL,
+    total_pages INTEGER AS Int NOT NULL
+);

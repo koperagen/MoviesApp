@@ -24,7 +24,7 @@ selectMoviesByIds:
 SELECT * FROM Movies WHERE id IN ?;
 
 CREATE TABLE MovieDiscoveries (
-    page INTEGER AS Int NOT NULL,
+    page INTEGER AS Int NOT NULL UNIQUE ON CONFLICT REPLACE,
     movies TEXT AS List<Int> NOT NULL,
     total_results INTEGER AS Int NOT NULL,
     total_pages INTEGER AS Int NOT NULL
