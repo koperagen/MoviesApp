@@ -1,11 +1,11 @@
 package com.example.moviesapp.shared
 
 import com.arkivanov.mvikotlin.core.view.MviView
-import com.example.moviesapp.shared.MovieView.Event
-import com.example.moviesapp.shared.MovieView.Model
+import com.example.moviesapp.shared.IndexView.Event
+import com.example.moviesapp.shared.IndexView.Model
 import com.example.moviesapp.shared.network.Movie
 
-interface MovieView : MviView<Model, Event> {
+interface IndexView : MviView<Model, Event> {
     sealed class Event {
         object NextPageClick : Event()
         object PreviousPageClick : Event()
@@ -14,7 +14,7 @@ interface MovieView : MviView<Model, Event> {
 
     data class Model(
         val page: Int,
-        val movies: List<Movie>,
+        val movies: List<FavouriteMovie>,
         val hasNextPage: Boolean,
         val hasPreviousPage: Boolean
     )

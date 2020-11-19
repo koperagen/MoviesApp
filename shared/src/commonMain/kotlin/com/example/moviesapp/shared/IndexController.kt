@@ -11,11 +11,10 @@ import com.arkivanov.mvikotlin.extensions.coroutines.states
 import com.example.moviesapp.shared.cache.AppDatabase
 import com.example.moviesapp.shared.cache.DatabaseMoviesCache
 import com.example.moviesapp.shared.network.MovieApi
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-class MovieController(
+class IndexController(
     private val dbFactory: () -> AppDatabase,
     private val defaultStoreFactory: StoreFactory,
     private val apiKey: String,
@@ -39,38 +38,36 @@ class MovieController(
         ioContext,
         FavouriteDatabaseImpl(dbFactory(), ioContext)
     ).create()
+
+    private val indexStore: IndexStore = IndexStoreFactory(
+        defaultStoreFactory, favouritesStore, store, mainContext
+    ).create()
+
     private var binder: Binder? = null
 
     init {
         lifecycle.doOnDestroy(store::dispose)
     }
 
-    fun onViewCreated(view: MovieView, viewLifecycle: Lifecycle) {
+    fun onViewCreated(view: IndexView, viewLifecycle: Lifecycle) {
         binder = bind(viewLifecycle, BinderLifecycleMode.START_STOP) {
-            store.states.map(stateToModel) bindTo view
-            view.events.map(eventToMovieIntent).filterNotNull() bindTo store
-            view.events.map(eventToFavouritesIntent).filterNotNull() bindTo favouritesStore
+            indexStore.states.map(stateToModel) bindTo view
+            view.events.map(eventToMovieIntent) bindTo indexStore
         }
     }
 
 }
 
-private val eventToMovieIntent: suspend MovieView.Event.() -> MovieStore.Intent? = {
+private val eventToMovieIntent: suspend IndexView.Event.() -> IndexStore.Intent = {
     when (this) {
-        MovieView.Event.NextPageClick -> MovieStore.Intent.NextPage
-        MovieView.Event.PreviousPageClick -> MovieStore.Intent.NextPage
-        is MovieView.Event.MovieClick -> null
+        is IndexView.Event.NextPageClick -> IndexStore.Intent.NextPage
+        is IndexView.Event.PreviousPageClick -> IndexStore.Intent.NextPage
+        is IndexView.Event.MovieClick -> IndexStore.Intent.ToggleMovie(movie.id)
     }
 }
 
-private val eventToFavouritesIntent: suspend MovieView.Event.() -> FavouritesStore.Intent? = {
-    when (this) {
-        MovieView.Event.NextPageClick ->  null
-        MovieView.Event.PreviousPageClick -> null
-        is MovieView.Event.MovieClick -> FavouritesStore.Intent.ToggleMovie(movie.id)
-    }
+private val stateToModel: suspend IndexStore.State.() -> IndexView.Model = {
+    IndexView.Model(currentPage, movies, hasMore(), currentPage > 1)
 }
 
-private val stateToModel: suspend MovieStore.State.() -> MovieView.Model = {
-    MovieView.Model(currentPage, movies, currentPage > 1, currentPage != totalPages)
-}
+private fun IndexStore.State.hasMore() = currentPage < totalPages

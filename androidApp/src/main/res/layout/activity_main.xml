@@ -5,7 +5,6 @@
     android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:rotationX="57"
     tools:context=".MainActivity">
 
   <androidx.recyclerview.widget.RecyclerView
@@ -26,7 +25,7 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="16dp"
       android:layout_marginBottom="16dp"
-      android:text="Вперед ->"
+      android:text="Вперед"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.5"
@@ -37,7 +36,7 @@
       android:id="@+id/previousPage"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="<- Назад"
+      android:text="Назад"
       app:layout_constraintBottom_toBottomOf="@+id/nextPage"
       app:layout_constraintEnd_toStartOf="@+id/nextPage"
       app:layout_constraintHorizontal_bias="0.5"

@@ -18,7 +18,7 @@ internal interface MovieStore : Store<Intent, State, News> {
         object PreviousPage : Intent()
     }
 
-    data class State(val movies: List<Movie>, val currentPage: Int, val totalPages: Int)
+    data class State(val currentPage: Int, val totalPages: Int, val movies: List<Movie>)
 
     sealed class News {
         object NoMorePages : News()
@@ -35,14 +35,14 @@ internal class MovieStoreFactory(
 
     fun create(): MovieStore = object : MovieStore, Store<Intent, State, News> by factory.create(
         name = "MovieStore",
-        initialState = State(emptyList(), 0, 0),
+        initialState = State(0, 0, emptyList()),
         bootstrapper = SimpleBootstrapper(Action.LoadFirstPage),
         executorFactory = ::ExecutorImpl,
         reducer = ReducerImpl
     ) {}
 
     private sealed class Result {
-        data class PageLoaded(val page: Int, val movies: List<Movie>, val totalPages: Int) : Result()
+        data class PageLoaded(val page: Int, val totalPages: Int, val movies: List<Movie>) : Result()
     }
 
     private sealed class Action {
@@ -75,7 +75,11 @@ internal class MovieStoreFactory(
 
         private suspend fun loadPage(page: Int) {
             val movies = withContext(ioContext) { repository.getMovies(page) }
-            dispatch(Result.PageLoaded(page = page, movies = movies.results, totalPages = movies.totalPages))
+            dispatch(Result.PageLoaded(
+                page = page,
+                totalPages = movies.totalPages,
+                movies = movies.results
+            ))
         }
 
     }

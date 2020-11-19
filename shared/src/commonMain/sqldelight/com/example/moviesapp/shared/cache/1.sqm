@@ -1,0 +1,3 @@
+CREATE TABLE FavouriteMovies (
+    id INTEGER AS Int NOT NULL
+);

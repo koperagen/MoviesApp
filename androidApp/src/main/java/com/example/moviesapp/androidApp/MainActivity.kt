@@ -15,10 +15,11 @@ import com.arkivanov.mvikotlin.core.lifecycle.asMviLifecycle
 import com.arkivanov.mvikotlin.core.view.BaseMviView
 import com.arkivanov.mvikotlin.logging.store.LoggingStoreFactory
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import com.example.moviesapp.shared.MovieController
-import com.example.moviesapp.shared.MovieView
-import com.example.moviesapp.shared.MovieView.Event
-import com.example.moviesapp.shared.MovieView.Model
+import com.example.moviesapp.shared.FavouriteMovie
+import com.example.moviesapp.shared.IndexController
+import com.example.moviesapp.shared.IndexView
+import com.example.moviesapp.shared.IndexView.Event
+import com.example.moviesapp.shared.IndexView.Model
 import com.example.moviesapp.shared.cache.DriverFactory
 import com.example.moviesapp.shared.cache.createDatabase
 import com.example.moviesapp.shared.network.Movie
@@ -27,7 +28,7 @@ import kotlinx.coroutines.Dispatchers
 
 class MainActivity : AppCompatActivity() {
 
-    private val controller = MovieController(
+    private val controller = IndexController(
         dbFactory = { createDatabase(DriverFactory(this)) },
         defaultStoreFactory = LoggingStoreFactory(DefaultStoreFactory),
         apiKey = "5e2154d0d7039ef73d73e64af47e8e6e",
@@ -40,13 +41,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val view = findViewById<View>(R.id.main_view)
-        val movieView = MovieViewImpl(view)
+        val movieView = IndexViewImpl(view)
         controller.onViewCreated(movieView, lifecycle.asMviLifecycle())
     }
 
 }
 
-class MovieViewImpl(private val root: View): BaseMviView<Model, Event>(), MovieView {
+class IndexViewImpl(private val root: View): BaseMviView<Model, Event>(), IndexView {
 
     private val adapter: MoviesAdapter = MoviesAdapter { dispatch(Event.MovieClick(it)) }
     private val movies: RecyclerView = root.findViewById(R.id.movies)
@@ -69,7 +70,7 @@ class MovieViewImpl(private val root: View): BaseMviView<Model, Event>(), MovieV
 
 }
 
-private class MoviesAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<Movie, MovieViewHolder>(MovieDiffCallback) {
+private class MoviesAdapter(private val onClick: (Movie) -> Unit) : ListAdapter<FavouriteMovie, MovieViewHolder>(MovieDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         return MovieViewHolder.from(parent, onClick)
@@ -90,15 +91,19 @@ private class MovieViewHolder private constructor(
     private val voteAverage: TextView = view.findViewById(R.id.voteAverage)
     private val poster: ImageView = view.findViewById(R.id.poster)
 
-    fun bind(item: Movie) {
-        title.text = item.title
-        voteAverage.text = view.context.getString(R.string.vote_average, item.voteAverage)
+    fun bind(item: FavouriteMovie) {
+        val (movie, favourite) = item
+        title.text = buildString(movie.title.length + 1) {
+            if (favourite) append("*")
+            append(movie.title)
+        }
+        voteAverage.text = view.context.getString(R.string.vote_average, movie.voteAverage)
         Picasso.get()
-            .load("http://image.tmdb.org/t/p/w500" + item.posterPath)
+            .load("http://image.tmdb.org/t/p/w500" + movie.posterPath)
             .error(R.drawable.ic_baseline_build_24)
             .into(poster)
         view.setOnClickListener {
-            onClick(item)
+            onClick(movie)
         }
     }
 
@@ -111,13 +116,13 @@ private class MovieViewHolder private constructor(
     }
 }
 
-private object MovieDiffCallback : DiffUtil.ItemCallback<Movie>() {
+private object MovieDiffCallback : DiffUtil.ItemCallback<FavouriteMovie>() {
 
-    override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean {
-        return oldItem.id == newItem.id
+    override fun areItemsTheSame(oldItem: FavouriteMovie, newItem: FavouriteMovie): Boolean {
+        return oldItem.movie.id == newItem.movie.id
     }
 
-    override fun areContentsTheSame(oldItem: Movie, newItem: Movie): Boolean {
+    override fun areContentsTheSame(oldItem: FavouriteMovie, newItem: FavouriteMovie): Boolean {
         return oldItem == newItem
     }
 

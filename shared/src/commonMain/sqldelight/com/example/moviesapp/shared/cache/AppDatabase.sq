@@ -31,7 +31,7 @@ CREATE TABLE MovieDiscoveries (
 );
 
 saveDiscovery:
-INSERT INTO MovieDiscoveries VALUES ?;
+INSERT INTO MovieDiscoveries VALUES ? ;
 
 loadDiscovery:
 SELECT * FROM MovieDiscoveries WHERE page = ?;
