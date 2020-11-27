@@ -27,7 +27,11 @@ internal interface IndexStore : Store<Intent, State, News> {
         object PreviousPage : Intent()
     }
 
-    data class State(val movies: List<FavouriteMovie>, val currentPage: Int, val totalPages: Int)
+    data class State(
+        val currentPage: Int,
+        val totalPages: Int,
+        val movies: List<FavouriteMovie>,
+    )
 
     sealed class News {
         object NoMorePages : News()
@@ -46,7 +50,7 @@ internal class IndexStoreFactory(
 
     fun create(): IndexStore = object : IndexStore, Store<Intent, State, News> by factory.create(
         name = "IndexStore",
-        initialState = State(emptyList(), 0, 0),
+        initialState = State(0, 0, emptyList()),
         bootstrapper = Bootstrapper(),
         executorFactory = ::ExecutorImpl,
         reducer = ReducerImpl,
@@ -71,7 +75,7 @@ internal class IndexStoreFactory(
         }
 
         override suspend fun executeAction(action: Action, getState: () -> State) {
-            return when(action) {
+            return when (action) {
                 is Action.Combine -> combine(action.movies.movies, action.favourites.movies)
                 is Action.PropagateNews.MovieNews -> publish(map(action))
             }
