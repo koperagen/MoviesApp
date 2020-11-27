@@ -25,6 +25,9 @@ internal class MovieApiImpl(private val apiKey: String) : MovieApi {
         return client.get("https://api.themoviedb.org/3/discover/movie") {
             parameter("api_key", apiKey)
             parameter("language", "ru-RU")
+            if (page != null) {
+                parameter("page", page)
+            }
             parameter("include_adult", false)
             parameter("include_video", false)
         }
