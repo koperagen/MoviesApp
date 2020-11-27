@@ -26,7 +26,7 @@ class MovieStoreTest {
     fun shows_first_page() {
         createStore()
 
-        assertEquals(1, store.state.currentPage)
+        assertEquals(Page(1), store.state.currentPage)
     }
 
     @Test
@@ -35,7 +35,21 @@ class MovieStoreTest {
 
         store.accept(MovieStore.Intent.NextPage)
 
-        assertEquals(2, store.state.currentPage)
+        assertEquals(Page(2), store.state.currentPage)
+    }
+
+    @Test
+    fun loads_prev_page_WHEN_Intent_PrevPage() {
+        createStore()
+
+        store.accept(MovieStore.Intent.NextPage)
+        store.accept(MovieStore.Intent.NextPage)
+
+        assertEquals(Page(3), store.state.currentPage)
+
+        store.accept(MovieStore.Intent.PreviousPage)
+
+        assertEquals(Page(2), store.state.currentPage)
     }
 
     private fun createStore() {

@@ -18,7 +18,7 @@ internal interface MovieStore : Store<Intent, State, News> {
         object PreviousPage : Intent()
     }
 
-    data class State(val currentPage: Int, val totalPages: Int, val movies: List<Movie>)
+    data class State(val currentPage: Page?, val totalPages: Int, val movies: List<Movie>)
 
     sealed class News {
         object NoMorePages : News()
@@ -35,14 +35,14 @@ internal class MovieStoreFactory(
 
     fun create(): MovieStore = object : MovieStore, Store<Intent, State, News> by factory.create(
         name = "MovieStore",
-        initialState = State(0, 0, emptyList()),
+        initialState = State(null, 0, emptyList()),
         bootstrapper = SimpleBootstrapper(Action.LoadFirstPage),
         executorFactory = ::ExecutorImpl,
         reducer = ReducerImpl
     ) {}
 
     private sealed class Result {
-        data class PageLoaded(val page: Int, val totalPages: Int, val movies: List<Movie>) : Result()
+        data class PageLoaded(val page: Page, val totalPages: Int, val movies: List<Movie>) : Result()
     }
 
     private sealed class Action {
@@ -53,7 +53,7 @@ internal class MovieStoreFactory(
 
         override suspend fun executeAction(action: Action, getState: () -> State) {
             return when (action) {
-                Action.LoadFirstPage -> loadPage(1)
+                Action.LoadFirstPage -> loadPage(Page.FIRST)
             }
         }
 
@@ -61,20 +61,20 @@ internal class MovieStoreFactory(
             val state = getState()
             return when (intent) {
                 Intent.NextPage -> {
-                    loadPage(state.currentPage + 1)
+                    state.currentPage.next(state.totalPages)
+                        ?.let { loadPage(it) }
+                        ?: publish(News.NoMorePages)
                 }
                 Intent.PreviousPage -> {
-                    if (state.currentPage <= 1) {
-                        publish(News.NoMorePages)
-                    } else {
-                        loadPage(state.currentPage - 1)
-                    }
+                    state.currentPage?.prev()
+                        ?.let { loadPage(it) }
+                        ?: publish(News.NoMorePages)
                 }
             }
         }
 
-        private suspend fun loadPage(page: Int) {
-            val movies = withContext(ioContext) { repository.getMovies(page) }
+        private suspend fun loadPage(page: Page) {
+            val movies = withContext(ioContext) { repository.getMovies(page.value) }
             dispatch(Result.PageLoaded(
                 page = page,
                 totalPages = movies.totalPages,
