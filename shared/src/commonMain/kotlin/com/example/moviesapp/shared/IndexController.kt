@@ -61,7 +61,7 @@ class IndexController(
 private val eventToMovieIntent: suspend IndexView.Event.() -> IndexStore.Intent = {
     when (this) {
         is IndexView.Event.NextPageClick -> IndexStore.Intent.NextPage
-        is IndexView.Event.PreviousPageClick -> IndexStore.Intent.NextPage
+        is IndexView.Event.PreviousPageClick -> IndexStore.Intent.PreviousPage
         is IndexView.Event.MovieClick -> IndexStore.Intent.ToggleMovie(movie.id)
     }
 }

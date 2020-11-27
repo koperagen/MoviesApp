@@ -64,7 +64,7 @@ internal class MovieStoreFactory(
                     loadPage(state.currentPage + 1)
                 }
                 Intent.PreviousPage -> {
-                    if (state.currentPage < 1) {
+                    if (state.currentPage <= 1) {
                         publish(News.NoMorePages)
                     } else {
                         loadPage(state.currentPage - 1)
