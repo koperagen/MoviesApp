@@ -12,7 +12,7 @@ version = "1.0-SNAPSHOT"
 
 val ktorVersion = "1.4.0"
 val serializationVersion = "1.0.0-RC"
-val coroutinesVersion = "1.3.9-native-mt"
+val coroutinesVersion = "1.4.1-native-mt"
 val mviKotlinVersion = "2.0.0"
 val sqlDelightVersion: String by project
 
@@ -26,13 +26,33 @@ repositories {
 }
 kotlin {
     android()
+
     ios {
         binaries {
             framework {
                 baseName = "shared"
+                export("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
+                export("com.arkivanov.mvikotlin:mvikotlin-iosx64:$mviKotlinVersion")
+                export("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
             }
         }
     }
+
+    val onPhone = System.getenv("SDK_NAME")?.startsWith("iphoneos") ?: false
+    val iosTarget = if (onPhone) {
+        iosArm64("ios")
+    } else {
+        iosX64("ios")
+    }
+
+    iosTarget.binaries {
+        framework {
+            baseName = "shared"
+            export("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
+            export("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
+        }
+    }
+
     sourceSets {
         val commonMain by getting {
             languageSettings.languageVersion = "1.4"
@@ -41,8 +61,9 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
-                implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
-                implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
+                api("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
+                api("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
+                implementation("com.arkivanov.mvikotlin:mvikotlin-logging:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
                 implementation("com.squareup.sqldelight:runtime:$sqlDelightVersion")
                 implementation("com.squareup.sqldelight:coroutines-extensions:$sqlDelightVersion")
@@ -69,7 +90,9 @@ kotlin {
         }
         val iosMain by getting {
             dependencies {
+                api("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
                 implementation("com.squareup.sqldelight:native-driver:$sqlDelightVersion")
+                implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }
         val iosTest by getting
