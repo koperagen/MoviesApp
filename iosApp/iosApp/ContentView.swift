@@ -7,7 +7,7 @@ func greet() -> String {
 
 struct ContentView: View {
     var body: some View {
-        Text(greet())
+        MovieIndex(proxy: IndexViewProxy())
     }
 }
 
@@ -16,3 +16,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
