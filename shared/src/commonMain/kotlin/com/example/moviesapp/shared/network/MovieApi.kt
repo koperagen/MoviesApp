@@ -15,7 +15,8 @@ public interface MovieApi {
 public fun MovieApi(apiKey: String): MovieApi = MovieApiImpl(apiKey)
 
 internal class MovieApiImpl(private val apiKey: String) : MovieApi {
-    private val client = HttpClient {
+
+    private val client get() = HttpClient {
         Json {
             serializer = KotlinxSerializer()
         }
